@@ -61,9 +61,10 @@ jobs:
         token: ${{ github.token }}
     - name: Tag
       id: tag
-      uses: paketo-buildpacks/github-config/actions/tag/increment-tag@main
+      uses: paketo-buildpacks/github-config/actions/tag/calculate-semver@semver-from-labels
       with:
-        current_version: ${{ steps.reset.outputs.current_version }}
+        repo: ${{ github.repository }}
+        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
     - name: Package
       run: ./scripts/package.sh --version "${{ steps.tag.outputs.tag }}"
     - name: Create Release Notes
