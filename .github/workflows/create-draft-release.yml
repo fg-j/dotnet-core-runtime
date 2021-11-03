@@ -73,7 +73,7 @@ jobs:
       id: tag
       run: |
         tag="${{ github.event.inputs.version }}"
-        if [ -z "${version}" ]; then
+        if [ -z "${tag}" ]; then
           tag="${{ steps.semver.outputs.tag }}"
         fi
         echo "::set-output name=tag::${tag}"
