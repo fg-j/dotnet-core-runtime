@@ -6,7 +6,11 @@ on:
     - main
   repository_dispatch:
     types: [ version-bump ]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of the release to cut (e.g. 1.2.3)'
+        required: false
 
 concurrency: release
 
@@ -59,11 +63,20 @@ jobs:
         repo: ${{ github.repository }}
         token: ${{ github.token }}
     - name: Calculate Semver Tag
-      id: tag
+      if: github.event.inputs.version == ''
+      id: semver
       uses: paketo-buildpacks/github-config/actions/tag/calculate-semver@semver-from-labels
       with:
         repo: ${{ github.repository }}
         token: ${{ github.token }}
+    - name: Set Release Tag
+      id: tag
+      run: |
+        tag="${{ github.event.inputs.version }}"
+        if [ -z "${version}" ]; then
+          tag="${{ steps.semver.outputs.tag }}"
+        fi
+        echo "::set-output name=tag::${tag}"
     - name: Package
       run: ./scripts/package.sh --version "${{ steps.tag.outputs.tag }}"
     - name: Create Release Notes
